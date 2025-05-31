@@ -2,11 +2,18 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
-# ⛔ DO NOT copy your API key into this chat ⛔
-# ✅ Paste your real key below directly in GitHub (never here)
-client = OpenAI(
-    api_key="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"
-)
+# Load environment variables from .env file
+load_dotenv()
+
+# Get API key from environment
+api_key = os.getenv("OPENAI_API_KEY")
+
+# Check if API key loaded properly
+if not api_key:
+    raise ValueError("OPENAI_API_KEY not found in environment. Make sure your .env file is set.")
+
+# Create the OpenAI client
+client = OpenAI(api_key=api_key)
 
 def get_gpt_response(system_prompt, user_msg):
     response = client.chat.completions.create(
