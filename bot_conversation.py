@@ -1,31 +1,34 @@
-import os
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
+import os
+import time
 
+# Load .env variables (make sure you have OPENAI_API_KEY set)
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI()
 
-frontend_system = "You are a frontend web designer. Focus on layout, responsiveness, accessibility, and UI development. Avoid backend logic."
-backend_system = "You are a backend specialist. Focus on API design, database structure, and authentication. Avoid frontend layout."
+# Define system messages for Fred (frontend) and Ben (backend)
+frontend_system = "You are Fred, a frontend web designer. Keep responses focused on UI/UX and frontend needs."
+backend_system = "You are Ben, a backend specialist. Keep responses focused on APIs, databases, and server logic."
 
-# Initial message from the Frontend bot
-frontend_msg = "I need the `/users` API to return `username` and `avatar URL` for the dashboard profile cards."
-
-def get_gpt_response(system_prompt, user_input):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
+# Function to get a GPT response
+def get_gpt_response(system_prompt, user_message):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_input}
+            {"role": "user", "content": user_message}
         ]
     )
-    return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message.content
 
-# Simulate conversation
-print("🟦 Frontend GPT:", frontend_msg)
-for _ in range(5):  # Change the range for longer convos
+# Initial message from Fred
+frontend_msg = "I need the `/users` API to return `username` and `avatar URL` for the dashboard profile cards."
+
+# Let the bots talk to each other
+for i in range(3):
+    print(f"\n🟦 Fred (Frontend): {frontend_msg}")
     backend_msg = get_gpt_response(backend_system, frontend_msg)
-    print("\n🟧 Backend GPT:", backend_msg)
-
+    print(f"🟧 Ben (Backend): {backend_msg}")
     frontend_msg = get_gpt_response(frontend_system, backend_msg)
-    print("\n🟦 Frontend GPT:", frontend_msg)
+    time.sleep(1)
